@@ -142,6 +142,87 @@ function showConnectorInformation(appContext, componentName, m, n) {
     });
 }
 
+function showComponentInformation(appContext, componentName, m, n) {
+    $.ajax({
+        type: "POST",
+        url: appContext+"/control/componentInformation",
+        data: { componentName : componentName },
+
+        beforeSend: function(){
+            $("#component-view-"+m+n).empty();
+            $("#component-view-"+m+n).hide();
+            $(".loading", "#component-tab-"+m+n).show();
+        },
+
+        complete: function(){
+            $("#component-view-"+m+n).show();
+            $(".loading", "#component-tab-"+m+n).hide();
+        },
+
+        success: function(response){
+            $("#component-view-"+m+n).html(response);
+        },
+
+        error: function(e){
+            window.console && console.warn("Error while loading component information for component " + componentName);
+        }
+    });
+}
+
+function showComponentActionInformation(appContext, componentName, m, n) {
+    $.ajax({
+        type: "POST",
+        url: appContext + "/control/componentActionInformation",
+        data: {componentName: componentName},
+
+        beforeSend: function () {
+            $("#component-action-view-" + m + n).empty();
+            $("#component-action-view-" + m + n).hide();
+            $(".loading", "#component-action-tab-" + m + n).show();
+        },
+
+        complete: function () {
+            $("#component-action-view-" + m + n).show();
+            $(".loading", "#component-action-tab-" + m + n).hide();
+        },
+
+        success: function (response) {
+            $("#component-action-view-" + m + n).html(response);
+            $('.execute-command').attr("current-index", "" + m + n);
+        },
+
+        error: function (e) {
+            window.console && console.warn("Error while loading component action information for component " + componentName);
+        }
+    });
+}
+
+function executeComponentActionCommand(appContext, componentName, name, current) {
+    let index = $(current).attr("current-index");
+    $.ajax({
+        type: "POST",
+        url: appContext + "/control/executeComponentActionCommand",
+        data: {componentName: componentName, name: name},
+        beforeSend: function () {
+            $('.command-result').remove();
+            $("#component-action-view-" + index).hide();
+            $(".loading", "#component-action-tab-" + index).show();
+        },
+
+        complete: function () {
+            $("#component-action-view-" + index).show();
+            $(".loading", "#component-action-tab-" + index).hide();
+        },
+        success: function (response) {
+            $(response).prependTo("#component-action-view-" + index);
+        },
+
+        error: function (e) {
+            window.console && console.warn("Error while loading component action information for component " + command);
+        }
+    });
+}
+
 function showHistory(appContext, componentName, m, n) {
     $.ajax({
         type: "POST",
@@ -172,7 +253,7 @@ function showHistory(appContext, componentName, m, n) {
 function applyConnectorConfiguration(appContext, applicationName, componentName, m, n) {
     $.ajax({
         type: "GET",
-        url: appContext + "/rest/connectors/configuration/" + applicationName + '/' + componentName,
+        url: appContext + "/rest/connectors/configuration/" + applicationName  + componentName,
 
         beforeSend: function() {
             $("#thresholds-tab-toggle-"+m+n).show();
